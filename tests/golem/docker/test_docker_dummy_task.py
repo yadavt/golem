@@ -111,9 +111,10 @@ class TestDockerDummyTask(TempDirFixture, DockerTestCase):
         DummyTask.VERIFICATION_QUEUE._reset()
         task_def = self._test_task_definition()
         node_name = "0123456789abcdef"
-        dir_manager = DirManager(self.path)
-        task_builder = DummyTaskBuilder(node_name, task_def, self.tempdir,
-                                        dir_manager)
+        task_builder = DummyTaskBuilder(
+            node_name=node_name,
+            task_definition=task_def,
+            dir_manager=DirManager(self.path))
         task = task_builder.build()  # type: DummyTask
         task.max_pending_client_results = 5
         return task

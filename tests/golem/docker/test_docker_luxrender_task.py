@@ -84,9 +84,10 @@ class TestDockerLuxrenderTask(TempDirFixture, DockerTestCase):
         LuxTask.VERIFICATION_QUEUE._reset()
         task_def = self._test_task_definition()
         node_name = "0123456789abcdef"
-        dir_manager = DirManager(self.path)
-        task_builder = LuxRenderTaskBuilder(node_name, task_def, self.tempdir,
-                                            dir_manager)
+        task_builder = LuxRenderTaskBuilder(
+            node_name=node_name,
+            task_definition=task_def,
+            dir_manager=DirManager(self.path))
         render_task = task_builder.build()
         render_task.__class__._update_task_preview = lambda self_: ()
         render_task.max_pending_client_results = 5

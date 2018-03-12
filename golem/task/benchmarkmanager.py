@@ -47,9 +47,10 @@ class BenchmarkManager(object):
         task_state.status = TaskStatus.notStarted
         task_state.definition = benchmark.task_definition
         self._validate_task_state(task_state)
-        builder = task_builder(self.node_name, task_state.definition,
-                               self.task_server.client.datadir,
-                               self.dir_manager)
+        builder = task_builder(
+            node_name=self.node_name,
+            task_definition=task_state.definition,
+            dir_manager=self.dir_manager)
         t = Task.build_task(builder)
         br = BenchmarkRunner(t, self.task_server.client.datadir,
                              success_callback, error_callback,

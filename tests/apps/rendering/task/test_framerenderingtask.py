@@ -51,14 +51,14 @@ class TestFrameRenderingTask(TestDirFixture, LogTestCase):
         rt.subtask_timeout = 600
         rt.estimated_memory = 1000
         rt.max_price = 15
-        task = FrameRenderingTaskMock(files_[0],
-                                      node_name="ABC",
-                                      task_definition=rt,
-                                      total_tasks=3,
-                                      root_path=self.path
-                                      )
-        dm = DirManager(self.path)
-        task.initialize(dm)
+        task = FrameRenderingTaskMock(
+            files_[0],
+            node_name="ABC",
+            task_definition=rt,
+            total_tasks=3,
+            dir_manager=DirManager(self.path)
+        )
+        task.initialize()
         return task
 
     def test_get_frame_name(self):
@@ -73,7 +73,6 @@ class TestFrameRenderingTask(TestDirFixture, LogTestCase):
     def test_accept_results(self):
         task = self._get_frame_task(use_frames=False)
         task._accept_client("NODE 1")
-        task.tmp_dir = self.path
         task.subtasks_given["SUBTASK1"] = {"start_task": 3, "node_id": "NODE 1", "parts": 1,
                                            "end_task": 3, "frames": [1],
                                            "status": SubtaskStatus.starting}
@@ -104,7 +103,6 @@ class TestFrameRenderingTask(TestDirFixture, LogTestCase):
         assert os.path.isfile(output_file)
 
         task = self._get_frame_task()
-        task.tmp_dir = self.path
         task._accept_client("NODE 1")
         task.subtasks_given["SUBTASK1"] = {"start_task": 3,
                                            "node_id": "NODE 1",
@@ -303,8 +301,7 @@ class TestFrameRenderingTaskBuilder(TestDirFixture, LogTestCase):
         definition.options.use_frames = True
         definition.options.frames = list(range(1, 7))
 
-        builder = FrameRenderingTaskBuilder(root_path=self.path,
-                                            dir_manager=DirManager(self.path),
+        builder = FrameRenderingTaskBuilder(dir_manager=DirManager(self.path),
                                             node_name="SOME NODE NAME",
                                             task_definition=definition)
 

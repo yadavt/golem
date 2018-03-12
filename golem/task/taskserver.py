@@ -58,7 +58,7 @@ class TaskServer(
             config_desc.node_name,
             self.node,
             self.keys_auth,
-            root_path=TaskServer.__get_task_manager_root(client.datadir),
+            dir_manager=client.dir_manager,
             use_distributed_resources=config_desc.
             use_distributed_resource_management,
             tasks_dir=os.path.join(client.datadir, 'tasks'))

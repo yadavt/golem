@@ -8,8 +8,10 @@ from pydispatch import dispatcher
 
 from apps.appsmanager import AppsManager
 from golem.core.common import HandleKeyError, get_timestamp_utc, \
-    timeout_to_deadline, to_unicode, update_dict
+    to_unicode, update_dict
+from golem.core.keysauth import KeysAuth
 from golem.manager.nodestatesnapshot import LocalTaskStateSnapshot
+from golem.network.p2p.node import Node
 from golem.network.transport.tcpnetwork import SocketAddress
 from golem.resource.dirmanager import DirManager
 from golem.resource.hyperdrive.resourcesmanager import \
@@ -55,9 +57,16 @@ class TaskManager(TaskEventListener):
     handle_subtask_key_error = HandleKeyError(log_subtask_key_error)
 
     def __init__(
-            self, node_name, node, keys_auth, listen_address="",
-            listen_port=0, root_path="res", use_distributed_resources=True,
-            tasks_dir="tasks", task_persistence=True):
+            self,
+            node_name: str,
+            node: Node,
+            keys_auth: KeysAuth,
+            dir_manager: DirManager,
+            listen_address: str = "",
+            listen_port: int = 0,
+            use_distributed_resources: bool = True,
+            tasks_dir: str = "tasks",
+            task_persistence: bool = True):
         super().__init__()
 
         self.apps_manager = AppsManager()
@@ -85,8 +94,7 @@ class TaskManager(TaskEventListener):
         self.tasks_dir = tasks_dir / "tmanager"
         if not self.tasks_dir.is_dir():
             self.tasks_dir.mkdir(parents=True)
-        self.root_path = root_path
-        self.dir_manager = DirManager(self.get_task_manager_root())
+        self.dir_manager = dir_manager
 
         resource_manager = HyperdriveResourceManager(
             self.dir_manager,
@@ -110,9 +118,6 @@ class TaskManager(TaskEventListener):
         if self.task_persistence:
             self.restore_tasks()
 
-    def get_task_manager_root(self):
-        return self.root_path
-
     def create_task(self, dictionary, minimal=False):
         # FIXME: Backward compatibility only. Remove after upgrading GUI.
         if not isinstance(dictionary, dict):
@@ -124,8 +129,10 @@ class TaskManager(TaskEventListener):
 
         definition = builder_type.build_definition(task_type, dictionary,
                                                    minimal)
-        builder = builder_type(self.node_name, definition,
-                               self.root_path, self.dir_manager)
+        builder = builder_type(
+            node_name=self.node_name,
+            task_definition=definition,
+            dir_manager=self.dir_manager)
 
         return Task.build_task(builder)
 

@@ -136,10 +136,6 @@ class LuxTask(renderingtask.RenderingTask):
     def __init__(self, halttime, haltspp, **kwargs):
         super().__init__(**kwargs)
 
-        self.dirManager = DirManager(self.root_path)
-        self.tmp_dir = \
-            self.dirManager.get_task_temporary_dir(self.header.task_id)
-
         self.halttime = halttime
         self.haltspp = int(math.ceil(haltspp / self.total_tasks))
         self.verification_error = False
@@ -169,8 +165,8 @@ class LuxTask(renderingtask.RenderingTask):
         state['preview_exr'] = None
         return state
 
-    def initialize(self, dir_manager):
-        super(LuxTask, self).initialize(dir_manager)
+    def initialize(self):
+        super(LuxTask, self).initialize()
         # FIXME With full verification
 
     def _write_interval_wrapper(self, halttime):
@@ -308,13 +304,13 @@ class LuxTask(renderingtask.RenderingTask):
 
     def get_reference_imgs(self):
         ref_imgs = []
-        dm = self.dirManager
-
         for i in range(0, self.reference_runs):
             dir = os.path.join(
-                dm.get_ref_data_dir(self.header.task_id, counter=i),
-                dm.tmp,
-                dm.output)
+                self.dir_manager.get_ref_data_dir(
+                    self.header.task_id,
+                    counter=i),
+                self.dir_manager.tmp,
+                self.dir_manager.output)
 
             f = glob.glob(os.path.join(dir, '*.' + self.output_format))
 
@@ -324,13 +320,12 @@ class LuxTask(renderingtask.RenderingTask):
         return ref_imgs
 
     def get_test_flm_for_verifier(self):
-        dm = self.dirManager
         dir = os.path.join(
-            dm.get_ref_data_dir(
+            self.dir_manager.get_ref_data_dir(
                 self.header.task_id,
                 counter='flmMergingTest'),
-            dm.tmp,
-            dm.output
+            self.dir_manager.tmp,
+            self.dir_manager.output
         )
 
         test_flm = glob.glob(os.path.join(dir, '*.flm'))
@@ -340,12 +335,8 @@ class LuxTask(renderingtask.RenderingTask):
     # CoreTask methods #
     ###################
     def query_extra_data_for_test_task(self):
-        self.test_task_res_path = \
-            self.dirManager.get_task_test_dir(
-                self.header.task_id)
-
-        if not os.path.exists(self.test_task_res_path):
-            os.makedirs(self.test_task_res_path)
+        self.test_task_res_path = self.dir_manager.get_task_test_dir(
+            self.header.task_id, create=True)
 
         scene_src = regenerate_lux_file(
             scene_file_src=self.scene_file_src,
@@ -540,8 +531,8 @@ class LuxTask(renderingtask.RenderingTask):
 
     def create_reference_data_for_task_validation(self):
         for i in range(0, self.reference_runs):
-            path = \
-                self.dirManager.get_ref_data_dir(self.header.task_id, counter=i)
+            path = self.dir_manager.get_ref_data_dir(
+                self.header.task_id, counter=i)
 
             computer = LocalComputer(
                 root_path=path,
@@ -554,7 +545,7 @@ class LuxTask(renderingtask.RenderingTask):
             computer.run()
             computer.tt.join()
 
-        path = self.dirManager.get_ref_data_dir(
+        path = self.dir_manager.get_ref_data_dir(
             self.header.task_id,
             counter='flmMergingTest'
         )

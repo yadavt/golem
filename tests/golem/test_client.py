@@ -1091,8 +1091,11 @@ class TestClientRPCMethods(TestWithDatabase, LogTestCase):
         self.assertEqual(c.task_test_result, None)
 
     def test_create_task(self, *_):
-        t = DummyTask(total_tasks=10, node_name="node_name",
-                      task_definition=DummyTaskDefinition())
+        t = DummyTask(
+            total_tasks=10,
+            node_name="node_name",
+            task_definition=DummyTaskDefinition(),
+            dir_manager=DirManager(self.path))
 
         c = self.client
         c.enqueue_new_task = Mock()

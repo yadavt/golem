@@ -100,12 +100,12 @@ class CoreTask(Task):
     def __init__(self,
                  task_definition: TaskDefinition,
                  node_name: str,
+                 dir_manager: DirManager,
                  owner_address="",
                  owner_port=0,
                  owner_key_id="",
                  max_pending_client_results=MAX_PENDING_CLIENT_RESULTS,
                  resource_size=None,
-                 root_path=None,
                  total_tasks=0
                  ):
         """Create more specific task implementation
@@ -170,23 +170,29 @@ class CoreTask(Task):
         self.full_task_timeout = task_timeout
         self.counting_nodes = {}
 
-        self.root_path = root_path
+        self.dir_manager = dir_manager
 
         self.stdout = {}  # for each subtask keep info about stdout received from computing node
         self.stderr = {}  # for each subtask keep info about stderr received from computing node
         self.results = {}  # for each subtask keep info about files containing results
 
         self.res_files = {}
-        self.tmp_dir = None
         self.max_pending_client_results = max_pending_client_results
+
+    @property
+    def root_path(self):
+        return self.dir_manager.root_path
+
+    @property
+    def tmp_dir(self):
+        return self.dir_manager.get_task_temporary_dir(
+            self.header.task_id, create=True)
 
     def is_docker_task(self):
         return len(self.docker_images or ()) > 0
 
-    def initialize(self, dir_manager: DirManager) -> None:
-        dir_manager.clear_temporary(self.header.task_id)
-        self.tmp_dir = dir_manager.get_task_temporary_dir(self.header.task_id,
-                                                          create=True)
+    def initialize(self) -> None:
+        self.dir_manager.clear_temporary(self.header.task_id)
 
     def needs_computation(self):
         return (self.last_task != self.total_tasks) or (self.num_failed_subtasks > 0)
@@ -299,7 +305,6 @@ class CoreTask(Task):
         if self.total_tasks == 0:
             return 0.0
         return self.num_tasks_received / self.total_tasks
-
 
     def update_task_state(self, task_state):
         pass
@@ -540,26 +545,24 @@ def accepting(query_extra_data_func):
 class CoreTaskBuilder(TaskBuilder):
     TASK_CLASS = CoreTask
 
-    # FIXME get the root path from dir_manager
-    def __init__(self, node_name, task_definition, root_path, dir_manager):
+    def __init__(self, node_name, task_definition, dir_manager):
         super(CoreTaskBuilder, self).__init__()
         self.task_definition = task_definition
         self.node_name = node_name
-        self.root_path = root_path
         self.dir_manager = dir_manager
         self.src_code = ""
         self.environment = None
 
     def build(self):
         task = self.TASK_CLASS(**self.get_task_kwargs())
-        task.initialize(self.dir_manager)
+        task.initialize()
         return task
 
     def get_task_kwargs(self, **kwargs):
         kwargs['total_tasks'] = int(self.task_definition.total_subtasks)
         kwargs["task_definition"] = self.task_definition
         kwargs["node_name"] = self.node_name
-        kwargs["root_path"] = self.root_path
+        kwargs["dir_manager"] = self.dir_manager
         return kwargs
 
     @classmethod

@@ -15,7 +15,7 @@ from golem import testutils
 from golem.core.common import get_timestamp_utc, timeout_to_deadline
 from golem.core.keysauth import KeysAuth
 from golem.network.p2p.node import Node
-from golem.resource import dirmanager
+from golem.resource.dirmanager import DirManager
 from golem.task.taskbase import Task, TaskHeader, \
     TaskEventListener, ResultType
 from golem.task.taskclient import TaskClient
@@ -29,7 +29,7 @@ from apps.dummy.task.dummytask import (
     DummyTaskDefaults,
     DummyTaskBuilder)
 from apps.dummy.task.dummytaskstate import DummyTaskDefinition
-from golem.resource.dirmanager import DirManager
+
 
 
 class PickableMock(Mock):
@@ -175,8 +175,10 @@ class TestTaskManager(LogTestCase, TestDirFixtureWithReactor,
     def _get_test_dummy_task(self, task_id):
         defaults = DummyTaskDefaults()
         tdd = DummyTaskDefinition(defaults)
-        dm = DirManager(self.path)
-        dtb = DummyTaskBuilder("MyNodeName", tdd, self.path, dm)
+        dtb = DummyTaskBuilder(
+            node_name="MyNodeName",
+            task_definition=tdd,
+            dir_manager=DirManager(self.path))
 
         dummy_task = dtb.build()
         header = self._get_task_header(task_id=task_id, timeout=120.0,
@@ -916,11 +918,12 @@ class TestTaskManager(LogTestCase, TestDirFixtureWithReactor,
             state.extra_data = dict(result_preview=previews[i % 3])
             state.subtask_states = subtask_states
 
-            task = BlenderRenderTask(node_name='node',
-                                     task_definition=definition,
-                                     total_tasks=n,
-                                     root_path=self.path)
-            task.initialize(dirmanager.DirManager(self.path))
+            task = BlenderRenderTask(
+                node_name='node',
+                task_definition=definition,
+                total_tasks=n,
+                dir_manager=DirManager(self.path))
+            task.initialize()
             task.get_total_tasks = Mock()
             task.get_progress = Mock()
             task.get_total_tasks.return_value = i + 2

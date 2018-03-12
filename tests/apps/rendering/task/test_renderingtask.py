@@ -52,15 +52,17 @@ class RenderingTaskMock(RenderingTask):
     def query_extra_data_for_test_task(self):
         pass
 
+
 class TestInitRenderingTask(TestDirFixture, LogTestCase):
     def test_init(self):
         with self.assertLogs(logger_core, level="WARNING"):
-            rt = RenderingTaskMock(main_program_file="notexisting",
-                                   task_definition=RenderingTaskDefinition(),
-                                   node_name="Some name",
-                                   total_tasks=10,
-                                   root_path=self.path
-                                   )
+            rt = RenderingTaskMock(
+                main_program_file="notexisting",
+                task_definition=RenderingTaskDefinition(),
+                node_name="Some name",
+                total_tasks=10,
+                dir_manager=DirManager(self.path)
+            )
         assert isinstance(rt, RenderingTask)
         assert rt.src_code == ""
 
@@ -85,14 +87,12 @@ class TestRenderingTask(TestDirFixture, LogTestCase):
             node_name="ABC",
             task_definition=task_definition,
             total_tasks=100,
-            root_path=self.path,
+            dir_manager=DirManager(self.path),
             owner_address="10.10.10.10",
             owner_port=1023,
             owner_key_id="keyid",
         )
-
-        dm = DirManager(self.path)
-        task.initialize(dm)
+        task.initialize()
         self.task = task
 
     def test_paths(self):
@@ -344,10 +344,10 @@ class TestRenderingTaskBuilder(TestDirFixture, LogTestCase):
     def test_calculate_total(self):
         definition = RenderingTaskDefinition()
         definition.optimize_total = True
-        builder = RenderingTaskBuilder(root_path=self.path,
-                                       dir_manager=DirManager(self.path),
-                                       node_name="SOME NODE NAME",
-                                       task_definition=definition)
+        builder = RenderingTaskBuilder(
+            dir_manager=DirManager(self.path),
+            node_name="SOME NODE NAME",
+            task_definition=definition)
 
         class Defaults(object):
             def __init__(self, default_subtasks=13, min_subtasks=3,

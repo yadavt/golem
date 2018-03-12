@@ -54,13 +54,11 @@ class TestBenchmarkRunner(testutils.TempDirFixture):
         task_state.status = TaskStatus.notStarted
         task_state.definition = task_definition
 
-        dir_manager = DirManager(self.path)
         task = Task.build_task(
             blenderrendertask.BlenderRenderTaskBuilder(
-                "node name",
-                task_definition,
-                self.path,
-                dir_manager
+                node_name="node name",
+                task_definition=task_definition,
+                dir_manager=DirManager(self.path)
             )
         )
 

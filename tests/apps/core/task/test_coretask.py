@@ -52,7 +52,10 @@ class TestCoreTask(LogTestCase, TestDirFixture):
 
         # abstract class cannot be instantiated
         with self.assertRaises(TypeError):
-            CoreTask(task_def, "node_name")
+            CoreTask(
+                task_definition=task_def,
+                node_name="node_name",
+                dir_manager=DirManager(self.path))
 
         class CoreTaskDeabstacted(CoreTask):
 
@@ -64,7 +67,10 @@ class TestCoreTask(LogTestCase, TestDirFixture):
 
         # ENVIRONMENT has to be set
         with self.assertRaises(TypeError):
-            CoreTaskDeabstacted(task_def, "node_name")
+            CoreTaskDeabstacted(
+                task_definition=task_def,
+                node_name="node_name",
+                dir_manager=DirManager(self.path))
 
         class CoreTaskDeabstractedEnv(CoreTask):
             ENVIRONMENT_CLASS = MagicMock()
@@ -78,8 +84,13 @@ class TestCoreTask(LogTestCase, TestDirFixture):
             def query_extra_data_for_test_task(self):
                 pass
 
-        self.assertTrue(isinstance(
-            CoreTaskDeabstractedEnv(task_def, "node_name"), CoreTask))
+        self.assertIsInstance(
+            CoreTaskDeabstractedEnv(
+                task_definition=task_def,
+                node_name="node_name",
+                dir_manager=DirManager(self.path)),
+            CoreTask
+        )
 
     def _get_core_task(self):
         task_def = TestCoreTask._get_core_task_definition()
@@ -89,10 +100,10 @@ class TestCoreTask(LogTestCase, TestDirFixture):
             owner_address="10.10.10.10",
             owner_port=123,
             owner_key_id="key",
-            resource_size=1024
+            resource_size=1024,
+            dir_manager=DirManager(self.path)
         )
-        dm = DirManager(self.path)
-        task.initialize(dm)
+        task.initialize()
         return task
 
     def test_core_task(self):
@@ -584,7 +595,7 @@ class TestTaskTypeInfo(TestCase):
 class TestCoreTaskBuilder(TestCase):
 
     def _get_core_task_builder(self):
-        return CoreTaskBuilder("Node1", MagicMock(), "path", MagicMock())
+        return CoreTaskBuilder("Node1", MagicMock(), MagicMock())
 
     def test_init(self):
         builder = self._get_core_task_builder()
@@ -592,7 +603,6 @@ class TestCoreTaskBuilder(TestCase):
         assert builder.TASK_CLASS == CoreTask
         assert builder.task_definition is not None
         assert builder.node_name == "Node1"
-        assert builder.root_path == "path"
         assert isinstance(builder.dir_manager, MagicMock)
 
     def test_get_task_kwargs(self):

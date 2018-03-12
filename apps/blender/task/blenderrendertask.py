@@ -55,8 +55,8 @@ class PreviewUpdater(object):
         self.preview_file_path = preview_file_path
         self.expected_offsets = expected_offsets
 
-        # where the match ends - since the chunks have unexpectable sizes, we 
-        # don't know where to paste new chunk unless all of the above are in 
+        # where the match ends - since the chunks have unexpectable sizes, we
+        # don't know where to paste new chunk unless all of the above are in
         # their correct places
         self.perfect_match_area_y = 0
         self.perfectly_placed_subtasks = 0
@@ -242,7 +242,7 @@ class BlenderTaskTypeInfo(CoreTaskTypeInfo):
     @classmethod
     def __get_border_path(cls, start, end, parts, res_x, res_y):
         """
-        Return list of points that make a border of subtasks with numbers 
+        Return list of points that make a border of subtasks with numbers
         between start and end.
         :param int start: number of first subtask
         :param int end: number of last subtask
@@ -343,8 +343,8 @@ class BlenderRenderTask(FrameRenderingTask):
                            "for this type of task, turning compositing off",
                            task_definition.task_id)
 
-    def initialize(self, dir_manager):
-        super(BlenderRenderTask, self).initialize(dir_manager)
+    def initialize(self):
+        super(BlenderRenderTask, self).initialize()
 
         if self.use_frames:
             parts = int(self.total_tasks / len(self.frames))
@@ -364,17 +364,17 @@ class BlenderRenderTask(FrameRenderingTask):
                                                                   PREVIEW_EXT)
                 preview_path = os.path.join(self.tmp_dir, preview_name)
                 self.preview_file_path.append(preview_path)
-                self.preview_updaters.append(PreviewUpdater(preview_path, 
+                self.preview_updaters.append(PreviewUpdater(preview_path,
                                                             preview_x,
-                                                            preview_y, 
+                                                            preview_y,
                                                             expected_offsets))
         else:
             preview_name = "current_preview.{}".format(PREVIEW_EXT)
             self.preview_file_path = "{}".format(os.path.join(self.tmp_dir,
                                                               preview_name))
-            self.preview_updater = PreviewUpdater(self.preview_file_path, 
+            self.preview_updater = PreviewUpdater(self.preview_file_path,
                                                   preview_x,
-                                                  preview_y, 
+                                                  preview_y,
                                                   expected_offsets)
 
     @coretask.accepting
@@ -566,7 +566,7 @@ class BlenderRenderTask(FrameRenderingTask):
         else:
             self._put_collected_files_together(os.path.join(self.tmp_dir, output_file_name),
                                                list(self.collected_file_names.values()), "paste")
-            
+
     def mark_part_on_preview(self, part, img_task, color, preview_updater, frame_index=0):
         lower = preview_updater.get_offset(part)
         upper = preview_updater.get_offset(part + 1)
@@ -636,7 +636,7 @@ class CustomCollector(RenderingTaskCollector):
     def __init__(self, paste=False, width=1, height=1):
         RenderingTaskCollector.__init__(self, paste, width, height)
         self.current_offset = 0
-    
+
     def _paste_image(self, final_img, new_part, num):
         with handle_image_error(logger), \
                 Image.new("RGB", (self.width, self.height)) as img_offset:
@@ -655,13 +655,13 @@ def generate_expected_offsets(parts, res_x, res_y):
     expected_offsets = [0]
     previous_end = 0
     for i in range(1, parts + 1):
-        low, high = get_min_max_y(i, parts, res_y) 
+        low, high = get_min_max_y(i, parts, res_y)
         low *= scale_factor * res_y
         high *= scale_factor * res_y
         height = int(math.floor(high - low))
         expected_offsets.append(previous_end)
         previous_end += height
-    
+
     expected_offsets.append(previous_end)
     return expected_offsets
 
@@ -688,4 +688,4 @@ def get_min_max_y(task_num, parts, res_y):
 
 
 
-    
+

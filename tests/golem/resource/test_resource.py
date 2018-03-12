@@ -97,10 +97,10 @@ class TestGetTaskResources(TempDirFixture):
             owner_address="10.10.10.10",
             owner_port=123,
             owner_key_id="key",
-            resource_size=1024
+            resource_size=1024,
+            dir_manager=DirManager(self.path)
         )
-        dm = DirManager(self.path)
-        task.initialize(dm)
+        task.initialize()
         return task
 
     def test_get_task_resources(self):

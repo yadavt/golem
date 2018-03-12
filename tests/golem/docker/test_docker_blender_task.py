@@ -71,8 +71,10 @@ class TestDockerBlenderTask(TempDirFixture, DockerTestCase):
         BlenderRenderTask.VERIFICATION_QUEUE._reset()
         task_def = self._load_test_task_definition(task_file)
         node_name = "0123456789abcdef"
-        dir_manager = DirManager(self.path)
-        task_builder = BlenderRenderTaskBuilder(node_name, task_def, self.tempdir, dir_manager)
+        task_builder = BlenderRenderTaskBuilder(
+            node_name=node_name,
+            task_definition=task_def,
+            dir_manager=(DirManager(self.path)))
         render_task = task_builder.build()
         render_task.__class__._update_task_preview = lambda self_: ()
         return render_task
@@ -207,9 +209,10 @@ class TestDockerBlenderTask(TempDirFixture, DockerTestCase):
         from golem.network.p2p.node import Node
         node_name = "some_node"
         task_def = self._load_test_task_definition(self.CYCLES_TASK_FILE)
-        dir_manager = DirManager(self.path)
-        builder = BlenderRenderTaskBuilder(node_name, task_def, self.tempdir,
-                                           dir_manager)
+        builder = BlenderRenderTaskBuilder(
+            node_name=node_name,
+            task_definition=task_def,
+            dir_manager=DirManager(self.path))
         task = builder.build()
         assert isinstance(task, BlenderRenderTask)
         assert not task.compositing

@@ -58,7 +58,7 @@ class BlenderTaskInitTest(TempDirFixture, LogTestCase):
                 node_name="exmaple-node-name",
                 task_definition=task_definition,
                 total_tasks=total_tasks,
-                root_path=self.tempdir,
+                dir_manager=DirManager(self.tempdir),
             )
 
         # Compostiting set to False
@@ -108,11 +108,9 @@ class TestBlenderFrameTask(TempDirFixture):
             node_name="example-node-name",
             task_definition=task_definition,
             total_tasks=6,
-            root_path=self.tempdir,
+            dir_manager=DirManager(self.path)
         )
-
-        dm = DirManager(self.path)
-        self.bt.initialize(dm)
+        self.bt.initialize()
 
     def test_init_preview(self):
         self.assertEqual(len(self.bt.preview_file_path),
@@ -255,16 +253,14 @@ class TestBlenderTask(TempDirFixture, LogTestCase):
         bt = BlenderRenderTask(node_name="example-node-name",
                                task_definition=task_definition,
                                total_tasks=total_tasks,
-                               root_path=self.tempdir,
+                               dir_manager=DirManager(self.tempdir),
                                )
-        bt.initialize(DirManager(self.tempdir))
+        bt.initialize()
         return bt
 
     def setUp(self):
         super(TestBlenderTask, self).setUp()
         self.bt = self.build_bt(2, 300, 7)
-        dm = DirManager(self.path)
-        self.bt.initialize(dm)
 
     def test_after_test(self):
         self.assertEqual(self.bt.after_test({}, None), {})
@@ -565,11 +561,9 @@ class TestBlenderTask(TempDirFixture, LogTestCase):
         assert extra_data.ctd is None
         assert not extra_data.should_wait
 
-
     def test_update_preview(self):
         bt = self.build_bt(300, 200, 10)
-        dm = DirManager(self.tempdir)
-        bt.initialize(dm)
+        bt.initialize()
         files = self.additional_dir_content([1])
         preview = files[0]
         img = Image.new("RGBA", (20, 200))
@@ -638,7 +632,6 @@ class TestBlenderRenderTaskBuilder(TempDirFixture):
         definition.options = BlenderRendererOptions()
         builder = BlenderRenderTaskBuilder(node_name="ABC",
                                            task_definition=definition,
-                                           root_path=self.tempdir,
                                            dir_manager=DirManager(self.tempdir))
         blender_task = builder.build()
         self.assertIsInstance(blender_task, BlenderRenderTask)

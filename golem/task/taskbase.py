@@ -191,10 +191,9 @@ class Task(abc.ABC):
             logger.warning("Trying to unregister listener that wasn't registered.")
 
     @abc.abstractmethod
-    def initialize(self, dir_manager):
+    def initialize(self):
         """Called after adding a new task, may initialize or create some resources
         or do other required operations.
-        :param DirManager dir_manager: DirManager instance for accessing temp dir for this task
         """
         return  # Implement in derived class
 

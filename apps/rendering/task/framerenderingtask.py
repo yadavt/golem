@@ -8,7 +8,7 @@ from PIL import Image, ImageChops
 from copy import deepcopy
 
 from apps.core.task.coretask import CoreTask
-from apps.core.task.coretaskstate import Options
+from apps.core.task.coretaskstate import Options, TaskDefinition
 from apps.rendering.resources.imgrepr import load_as_pil
 from apps.rendering.resources.renderingtaskcollector import \
     RenderingTaskCollector
@@ -18,6 +18,7 @@ from apps.rendering.task.renderingtask import (RenderingTask,
                                                PREVIEW_EXT)
 from apps.rendering.task.verifier import FrameRenderingVerifier
 from golem.core.common import update_dict, to_unicode
+from golem.resource.dirmanager import DirManager
 from golem.task.taskbase import ResultType
 from golem.task.taskstate import SubtaskStatus, TaskStatus, SubtaskState
 
@@ -438,7 +439,10 @@ def get_frame_name(output_name, ext, frame_num):
 class FrameRenderingTaskBuilder(RenderingTaskBuilder):
     TASK_CLASS = FrameRenderingTask
 
-    def __init__(self, node_name, task_definition, root_path, dir_manager):
+    def __init__(self,
+                 node_name: str,
+                 task_definition: TaskDefinition,
+                 dir_manager: DirManager):
         frames = task_definition.options.frames
 
         if isinstance(frames, str):
@@ -447,7 +451,7 @@ class FrameRenderingTaskBuilder(RenderingTaskBuilder):
 
         super(FrameRenderingTaskBuilder, self).__init__(node_name,
                                                         task_definition,
-                                                        root_path, dir_manager)
+                                                        dir_manager)
 
     def _calculate_total(self, defaults):
         if self.task_definition.optimize_total or \

@@ -15,6 +15,7 @@ from apps.dummy.dummyenvironment import DummyTaskEnvironment
 from apps.dummy.task.dummytaskstate import DummyTaskDefaults, DummyTaskOptions
 from apps.dummy.task.dummytaskstate import DummyTaskDefinition
 from apps.dummy.task.verifier import DummyTaskVerifier
+from golem.resource.dirmanager import DirManager
 from golem.task.taskbase import Task
 from golem.task.taskstate import SubtaskStatus
 
@@ -44,7 +45,7 @@ class DummyTask(CoreTask):
                  total_tasks: int,
                  node_name: str,
                  task_definition: DummyTaskDefinition,
-                 root_path=None,
+                 dir_manager: DirManager,
                  # TODO change that when TaskHeader will be updated
                  owner_address="",
                  owner_port=0,
@@ -56,7 +57,7 @@ class DummyTask(CoreTask):
             owner_address=owner_address,
             owner_port=owner_port,
             owner_key_id=owner_key_id,
-            root_path=root_path,
+            dir_manager=dir_manager,
             total_tasks=total_tasks
         )
 

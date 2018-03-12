@@ -49,8 +49,10 @@ class TestLuxRenderTask(TempDirFixture, LogTestCase, PEP8MixIn):
         # td.main_scene_file= os.path.join(self.path, 'scene.lxs')
         # td.add_to_resources()
 
-        dm = DirManager(self.path)
-        lb = LuxRenderTaskBuilder("ABC", td, self.path, dm)
+        lb = LuxRenderTaskBuilder(
+            node_name="ABC",
+            task_definition=td,
+            dir_manager=(DirManager(self.path)))
         return lb.build()
 
     def test_luxtask(self):
@@ -426,7 +428,10 @@ class TestLuxRenderTaskBuilder(TempDirFixture):
         td.main_scene_file = os.path.join(self.path, 'scene.lxs')
         td.options = LuxRenderOptions()
         td.add_to_resources()
-        lb = LuxRenderTaskBuilder("ABC", td, self.path, DirManager(self.path))
+        lb = LuxRenderTaskBuilder(
+            node_name="ABC",
+            task_definition=td,
+            dir_manager=DirManager(self.path))
         return lb.build()
 
     def test_build_dictionary(self):
