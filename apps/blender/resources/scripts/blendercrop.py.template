@@ -1,6 +1,7 @@
 # This template is rendered by
 # apps.blender.resources.scenefileeditor.generate_blender_crop_file(),
 # written to tempfile and passed as arg to blender.
+import os
 import bpy
 
 class EngineWarning(bpy.types.Operator):
@@ -33,6 +34,9 @@ class ShowInformation(bpy.types.Operator):
 
         return {"FINISHED"}
 
+mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+mem_mib = mem_bytes / (1024 ** 2)
+bpy.config.sequenceMemCacheLimit = int(mem_mib * 0.85)
 
 bpy.utils.register_class(EngineWarning)
 engine = bpy.context.scene.render.engine
