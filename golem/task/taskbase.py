@@ -1,7 +1,7 @@
 import abc
 import logging
 import time
-from typing import List, Tuple, Union, Type
+from typing import List, Tuple, Union, Type, Optional
 
 from apps.core.task.coretaskstate import TaskDefinition, TaskDefaults, Options
 import golem
@@ -42,13 +42,9 @@ class TaskHeader(object):
         network as an offer for computing nodes
     """
     def __init__(self,
-                 node_name: str,
                  task_id: str,
-                 task_owner_address,
-                 task_owner_port,
-                 task_owner_key_id,
-                 environment: str, # environment.get_id()
-                 task_owner=None,
+                 environment: str,  # environment.get_id()
+                 task_owner: Node,
                  deadline=0.0,
                  subtask_timeout=0.0,
                  resource_size=0,
@@ -63,15 +59,11 @@ class TaskHeader(object):
         """
 
         self.task_id = task_id
-        self.task_owner_key_id = task_owner_key_id
-        self.task_owner_address = task_owner_address
-        self.task_owner_port = task_owner_port
         self.task_owner = task_owner
         # TODO change last_checking param
         self.last_checking = time.time()
         self.deadline = deadline
         self.subtask_timeout = subtask_timeout
-        self.node_name = node_name
         self.resource_size = resource_size
         self.environment = environment
         self.estimated_memory = estimated_memory
